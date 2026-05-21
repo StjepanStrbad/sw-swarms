@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Game</title>
+<style>
+  /* CSS styles */
+  body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+
+  #game-container {
+    width: 100vw;
+    height: 100vh;
+    background-color: lightblue;
+    color: #fff;
+    position: relative;
+    background-size: cover;
+    background-image: url('bak2.jpeg');
+  }
+
+  /* CSS styles */
+  #player {
+    width: 125px;
+    height: 125px;
+    position: absolute;
+    background-image: url('6.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: transparent; /* Set background color to transparent */
+    border: none; /* Remove any borders */
+  }
+
+  .aim-line {
+    position: absolute;
+    width: 2px;
+    background-color: white;
+    z-index: 1;
+    display: none;
+  }
+
+  /* CSS styles */
+  .enemy {
+    width: 125px;
+    height: 125px;
+    position: absolute;
+    background-image: url('tie7.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: none;
+  }
+
+  .bullet {
+    background-color: red;
+    width: 5px;
+    height: 15px;
+    position: absolute;
+    border-radius: 50px;
+  }
+
+  #bullet-count {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  /* Overlay styles */
+  #overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: none; /* Initially hidden */
+    z-index: 2; /* Ensure it's above other elements */
+  }
+
+  #game-over {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    display: none; /* Initially hidden */
+    z-index: 3; /* Ensure it's above other elements */
+    color: yellow;
+    font-size: 50px;
+  }
+  .supply-drop {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    background-repeat: no-repeat;
+    
+    border: none;
+    background-image: url('ammo2.png');
+    background-size: cover; /* Set background size to cover */
+}
+
+.points-pickup {
+  width: 90px;
+  height: 90px;
+  background-image: url("R2-D2-PNG-Clipart.png");
+  background-size: contain;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    border: none;
+  position: absolute;
+}
+#points-count{
+  position: absolute;
+    top: 40px;
+    right: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+.headline{
+  text-align: center;
+  background-color: black;
+  color: yellow;
+  opacity: 80%;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  height: 100px;
+  font-size: 70px;
+}
+.startMenu{
+  position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+     /* Initially hidden */
+    z-index: 3; /* Ensure it's above other elements */
+    color: yellow;
+    background-color: transparent;
+    background-image: url('bak2.jpeg');
+    font-size: 50px;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    font-weight: bold;
+    
+}
+.startMenu h1{
+  margin-top: 150px;
+}
+.startus{
+  margin-top: 200px;
+  color: lime;
+  display: inline;
+  
+}
+.controlus{
+  margin-top: 100px;
+  color: red;
+  display: inline;
+}
+.controlMenus{
+  position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    
+    display: none; /* Initially hidden */
+    z-index: 3; /* Ensure it's above other elements */
+    color: yellow;
+    
+    background-color: transparent;
+    background-image: url('bak2.jpeg');
+    font-size: 50px;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    
+}
+.center{
+  position: absolute;
+  left: 40%;
+  width: 600px;
+  height: 100vh;
+  margin-top: 100px;
+  
+}
+.center img{
+  float: right;
+  
+}
+.keys{
+  width: 80px;
+  height: 80px;
+  background-color: white;
+  margin: 0 50px;
+  border-radius: 20%;
+ 
+}
+.back{
+  font-size: larger;
+  font-weight: bold;
+  color: red;
+}
+span{
+ 
+  position: absolute;
+  top: 110px;
+  left:400px;
+  font-size: 100px;
+}
+.youDead{
+  width: 70px;
+  height: 60px;
+  color: red;
+  font-size: 50px;
+  display: inline;margin: 40px;
+  border: 5px red solid;
+  padding: 10px;
+  border-radius: 5px;
+}
+</style>
+</head>
+<body>
+  
+  
+  <div id="game-container">
+    <center><div class="headline">STAR WARS: SWARMS</div></center>
+    <div id="player" class="character"></div>
+    <div id="aim-line" class="aim-line"></div> <!-- Add aim-line element -->
+    <div id="bullet-count">Bullets: 30 / 60</div>
+    <div id="points-count">R2D2's collected: 0</div> <!-- Add points counter element -->
+  </div>
+  
+
+<!-- Overlay and game over message -->
+<div id="overlay"></div>
+<div id="game-over">
+  <h1>Game Over</h1>
+  <div onclick="resetGame()" class="youDead" style="color: lime;border: lime 5px solid;">Restart</div>
+  <div onclick="restartMenu()" class="youDead">Menu</div>
+</div>
+
+
+<div class="startMenu">
+  <h1>Welcome to <br/>STAR WARS: SWARMS</h1></br></br>
+  <div class="startus" onclick="startFromStart()">Start game</div></br></br></br>
+  <div class="controlus" onclick="seeControls()">View Controls</div>
+</div>
+
+
+<div class="controlMenus">
+  <div class="center">
+    <div class="back" onclick="getBack()">Go Back</div>
+    <br/>
+    <div class="controlItem">Move: <img src="wasd.png" class="keys"> <span>/</span> <img src="arrows.png" class="keys"></div>
+    <br/>
+    <div class="controlItem">Shoot:<img src="space.png" class="keys"></div>
+    <br/>
+    <div class="controlItem">Aim Line: (hold) <img src="klik.png" class="keys"></div>
+  </div>
+
+</div>
+
+
+<script>
+  // JavaScript code
+  let gameActive = false; // Variable to control game activity
+  
+  var controlus=document.getElementsByClassName("controlus");
+
+ 
+  
+
+  function startFromStart() {
+    // Get all elements with the class "startMenu"
+    var startMenus = document.getElementsByClassName("startMenu");
+    startMenus[0].style.display = "none";
+    
+    resetGame();
+    
+   
+}
+function seeControls(){
+  var controlMenu=document.getElementsByClassName("controlMenus");
+  var startMenus = document.getElementsByClassName("startMenu");
+  startMenus[0].style.display = "none";
+  controlMenu[0].style.display = "block";
+
+}
+function getBack(){
+  var controlMenu=document.getElementsByClassName("controlMenus");
+  var startMenus = document.getElementsByClassName("startMenu");
+  startMenus[0].style.display = "block";
+  controlMenu[0].style.display = "none";
+}
+function restartMenu(){
+  let gameActive = false; // Variable to control game activity
+  
+  var startMenus = document.getElementsByClassName("startMenu");
+    startMenus[0].style.display = "block";
+    
+}
+
+
+
+
+  class Character {
+    constructor(x, y, health, damage) {
+      this.x = x;
+      this.y = y;
+      this.health = health;
+      this.damage = damage;
+    }
+
+    updatePosition() {
+      // Ensure player stays within the boundaries of the screen
+      this.x = Math.max(0, Math.min(this.x, window.innerWidth - this.element.offsetWidth));
+      this.y = Math.max(0, Math.min(this.y, window.innerHeight - this.element.offsetHeight));
+      this.element.style.left = this.x + 'px';
+      this.element.style.top = this.y + 'px';
+      // Update rotation based on the last direction
+      switch (this.lastDirection) {
+        case 'up':
+          this.element.style.transform = 'rotate(0deg)';
+          break;
+        case 'down':
+          this.element.style.transform = 'rotate(180deg)';
+          break;
+        case 'left':
+          this.element.style.transform = 'rotate(-90deg)';
+          break;
+        case 'right':
+          this.element.style.transform = 'rotate(90deg)';
+          break;
+        case 'upleft':
+          this.element.style.transform = 'rotate(-45deg)';
+          break;
+        case 'upright':
+          this.element.style.transform = 'rotate(45deg)';
+          break;
+        case 'downleft':
+          this.element.style.transform = 'rotate(-135deg)';
+          break;
+        case 'downright':
+          this.element.style.transform = 'rotate(135deg)';
+          break;
+        default:
+          break;
+      }
+    }
+
+    remove() {
+    if (this.element) {
+        this.element.parentNode.removeChild(this.element); // Remove the enemy element from the DOM
+    }
+}
+}
+
+
+
+
+
+
+
+  class Player extends Character {
+    constructor(x, y) {
+        super(x, y, 100, 10);
+        this.element = document.getElementById('player');
+        this.lastDirection = 'up';
+        this.aimLine = document.getElementById('aim-line');
+        this.magazineCapacity = 30;
+        this.totalBulletCapacity = 60;
+        this.bulletCount = this.magazineCapacity;
+        this.points = 0; // Initialize points property
+        this.updateBulletCount();
+        this.x = window.innerWidth / 2 - this.element.offsetWidth / 2;
+        this.y = window.innerHeight / 2 - this.element.offsetHeight / 2;
+        this.updatePosition();
+        this.fireRate = 150;
+        this.lastShotTime = 0;
+    }
+    collectPoints(points) {
+        this.points += 1;
+        updatePointsDisplay.bind(this)(); // Update points display with bind
+    }
+  
+    moveUp() {
+      if (!gameActive) return; // Prevent movement if game is not active
+      this.y -= 10;
+      this.lastDirection = 'up';
+      this.updatePosition();
+      this.updateAimLine();
+    }
+  
+    moveDown() {
+      if (!gameActive) return; // Prevent movement if game is not active
+      this.y += 10;
+      this.lastDirection = 'down';
+      this.updatePosition();
+      this.updateAimLine();
+    }
+  
+    moveLeft() {
+      if (!gameActive) return; // Prevent movement if game is not active
+      this.x -= 10;
+      this.lastDirection = 'left';
+      this.updatePosition();
+      this.updateAimLine();
+    }
+  
+    moveRight() {
+      if (!gameActive) return; // Prevent movement if game is not active
+      this.x += 10;
+      this.lastDirection = 'right';
+      this.updatePosition();
+      this.updateAimLine();
+    }
+    
+    moveUpLeft() {
+  if (!gameActive) return;
+  this.x -= 1.57; // Adjusted diagonal movement speed
+  this.y -= 1.57; // Adjusted diagonal movement speed
+  this.lastDirection = 'upleft';
+  this.updatePosition();
+  this.updateAimLine();
+}
+
+moveUpRight() {
+  if (!gameActive) return;
+  this.x += 1.57; // Adjusted diagonal movement speed
+  this.y -= 1.57; // Adjusted diagonal movement speed
+  this.lastDirection = 'upright';
+  this.updatePosition();
+  this.updateAimLine();
+}
+
+moveDownLeft() {
+  if (!gameActive) return;
+  this.x -= 1.57; // Adjusted diagonal movement speed
+  this.y += 1.57; // Adjusted diagonal movement speed
+  this.lastDirection = 'downleft';
+  this.updatePosition();
+  this.updateAimLine();
+}
+
+moveDownRight() {
+  if (!gameActive) return;
+  this.x += 1.57; // Adjusted diagonal movement speed
+  this.y += 1.57; // Adjusted diagonal movement speed
+  this.lastDirection = 'downright';
+  this.updatePosition();
+  this.updateAimLine();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    shoot() {
+      if (!gameActive) return; // Prevent shooting if game is not active
+      const currentTime = new Date().getTime();
+      if (currentTime - this.lastShotTime >= this.fireRate) {
+        // Check if enough time has passed since the last shot
+        // Proceed with shooting
+        if (this.bulletCount > 0) {
+          // Calculate the center position of the player character
+          const playerWidth = this.element.offsetWidth;
+          const playerHeight = this.element.offsetHeight;
+          const playerCenterX = this.x + playerWidth / 2;
+          const playerCenterY = this.y + playerHeight / 2;
+  
+          // Create a new bullet with the starting position set to the center of the player character
+          const bullet = new Bullet(playerCenterX, playerCenterY, this.lastDirection);
+          bullet.move();
+          this.bulletCount--;
+          this.updateBulletCount();
+          this.lastShotTime = currentTime; // Update the last shot time
+        }
+      }
+    }
+  
+    updateAimLine() {
+      const playerWidth = this.element.offsetWidth;
+      const playerHeight = this.element.offsetHeight;
+      const playerCenterX = this.x + playerWidth / 2;
+      const playerCenterY = this.y + playerHeight / 2;
+      const horizontalAdjustment = 25; // Horizontal adjustment for all lines
+  
+      switch (this.lastDirection) {
+        case 'up':
+          this.aimLine.style.width = '2px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX +5) + 'px';
+          this.aimLine.style.top = (playerCenterY - 250) + 'px';
+          this.aimLine.style.transform = 'rotate(0deg)';
+          break;
+        case 'down':
+          this.aimLine.style.width = '2px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX + 5) + 'px';
+          this.aimLine.style.top = playerCenterY + 'px';
+          this.aimLine.style.transform = 'rotate(180deg)';
+          break;
+        case 'left':
+          this.aimLine.style.width = '2px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX - 125) + 'px'; // Adjusted left position
+          this.aimLine.style.top = (playerCenterY - 120) + 'px'; // Adjusted top position
+          this.aimLine.style.transform = 'rotate(-90deg)';
+          break;
+        case 'right':
+          this.aimLine.style.width = '2px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX + 125) + 'px'; // Adjusted left position
+          this.aimLine.style.top = (playerCenterY - 120) + 'px'; // Adjusted top position
+          this.aimLine.style.transform = 'rotate(90deg)';
+          break;
+        case 'upleft':
+          this.aimLine.style.width = '3px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX - 90) + 'px'; // Adjusted left position
+          this.aimLine.style.top = (playerCenterY - 215) + 'px'; // Adjusted top position
+          this.aimLine.style.transform = 'rotate(-45deg)';
+          break;
+        case 'upright':
+          this.aimLine.style.width = '3px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX + 90) + 'px'; // Adjusted left position
+          this.aimLine.style.top = (playerCenterY - 205) + 'px'; // Adjusted top position
+          this.aimLine.style.transform = 'rotate(45deg)';
+          break;
+        case 'downleft':
+          this.aimLine.style.width = '3px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX - 90) + 'px'; // Adjusted left position
+          this.aimLine.style.top = (playerCenterY - 25) + 'px'; // Adjusted top position
+          this.aimLine.style.transform = 'rotate(-135deg)';
+          break;
+        case 'downright':
+          this.aimLine.style.width = '3px';
+          this.aimLine.style.height = '250px';
+          this.aimLine.style.left = (playerCenterX + 90) + 'px'; // Adjusted left position
+          this.aimLine.style.top = (playerCenterY - 35) + 'px'; // Adjusted top position
+          this.aimLine.style.transform = 'rotate(135deg)';
+          break;
+      }
+    }
+
+    updateBulletCount() {
+      document.getElementById('bullet-count').textContent = `Bullets: ${this.bulletCount} / ${this.totalBulletCapacity}`;
+    }
+
+    reload() {
+    const bulletsNeeded = this.magazineCapacity - this.bulletCount;
+    if (this.totalBulletCapacity >= bulletsNeeded) {
+        this.totalBulletCapacity -= bulletsNeeded;
+        this.bulletCount += bulletsNeeded; // Fix: Add the bullets to bulletCount
+        this.updateBulletCount();
+    } else if (this.totalBulletCapacity > 0) {
+        this.bulletCount += this.totalBulletCapacity;
+        this.totalBulletCapacity = 0;
+        this.updateBulletCount();
+    } else {
+        console.log("Out of bullets! Can't reload.");
+    }
+}
+    fullCap(){
+      this.totalBulletCapacity = 60;
+    }
+
+  }
+  
+  class Enemy extends Character {
+    constructor(x, y, health, damage, player) {
+      super(x, y, health, damage);
+      this.player = player;
+      this.hitPoints = 6; // Initialize hit points to 4
+      this.element = document.createElement('div'); // Create element
+      this.element.classList.add('enemy'); // Add class
+      document.getElementById('game-container').appendChild(this.element); // Append to game container
+      this.move(); // Start moving the enemy immediately upon creation
+    }
+    hitByBullet() {
+    this.hitPoints--; // Decrease hit points
+    if (this.hitPoints <= 0) {
+        this.remove(); // Remove the enemy from the DOM
+        const index = enemies.indexOf(this); // Find the index of the enemy in the enemies array
+        if (index !== -1) {
+            enemies.splice(index, 1); // Remove the enemy from the enemies array
+        }
+    }
+}
+
+
+
+
+
+move() {
+    if (!gameActive) return; // Stop enemy movement if game is not active
+    // Calculate direction towards the player
+    const dx = this.player.x - this.x;
+    const dy = this.player.y - this.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const speed = 1; // Adjust the speed as needed
+    const vx = (speed / distance) * dx;
+    const vy = (speed / distance) * dy;
+
+    this.x += vx;
+    this.y += vy;
+    this.updatePosition(); // Update position here
+
+    // Check collision with player
+    if (this.checkCollision(this.player)) {
+        this.remove(); // Remove the enemy from the DOM
+        const index = enemies.indexOf(this); // Find the index of the enemy in the enemies array
+        if (index !== -1) {
+            enemies.splice(index, 1); // Remove the enemy from the enemies array
+        }
+        gameOver();
+    }
+
+    // Continue moving the enemy recursively
+    requestAnimationFrame(() => this.move());
+}
+
+
+    updatePosition() {
+      // Ensure enemy stays within the boundaries of the screen
+      this.x = Math.max(0, Math.min(this.x, window.innerWidth - this.element.offsetWidth));
+      this.y = Math.max(0, Math.min(this.y, window.innerHeight - this.element.offsetHeight));
+      this.element.style.left = this.x + 'px';
+      this.element.style.top = this.y + 'px';
+    }
+
+    checkCollision(character) {
+      return (
+        this.x < character.x + character.element.offsetWidth &&
+        this.x + this.element.offsetWidth > character.x &&
+        this.y < character.y + character.element.offsetHeight &&
+        this.y + this.element.offsetHeight > character.y
+      );
+    }
+  }
+
+
+
+
+
+
+
+
+  class SupplyDrop extends Character {
+    constructor(x, y) {
+        super(x, y, 0, 0); // Supply drops don't have health or damage
+        this.element = document.createElement('div');
+        this.element.classList.add('supply-drop');
+        document.getElementById('game-container').appendChild(this.element);
+        this.updatePosition(); // Call updatePosition to set initial position
+    }
+
+    checkCollision(character) {
+        return (
+            this.x < character.x + character.element.offsetWidth &&
+            this.x + this.element.offsetWidth > character.x &&
+            this.y < character.y + character.element.offsetHeight &&
+            this.y + this.element.offsetHeight > character.y
+        );
+    }
+}
+
+// Array to store supply drops
+const supplyDrops = [];
+
+// Spawn supply drops periodically
+let supplyDropInterval = setInterval(function(){
+    if (!gameActive) return; // Stop spawning supply drops if game is not active
+    // Randomly determine spawn position within the game container
+    const spawnX = Math.random() * (window.innerWidth - 50); // Subtract character width
+    const spawnY = Math.random() * (window.innerHeight - 50); // Subtract character height
+
+    const supplyDrop = new SupplyDrop(
+        spawnX,
+        spawnY
+    );
+    supplyDrops.push(supplyDrop);
+}, 34000); // Adjust the interval as needed 150000
+
+
+// Check collision between player and supply drops
+setInterval(function() {
+    if (!gameActive) return; // Stop checking collision if game is not active
+    supplyDrops.forEach((supplyDrop, index) => {
+        if (supplyDrop.checkCollision(player)) {
+            // Refill player's ammo
+            player.reload.bind(player)();
+            //FIll
+            player.fullCap.bind(player)();
+            //BU
+            player.updateBulletCount.bind(player)();
+            // Remove the supply drop from the array
+            supplyDrops.splice(index, 1);
+            // Remove the supply drop element from the DOM
+            supplyDrop.remove();
+        }
+    });
+}, 100); // Adjust the interval as needed
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class PointsPickup extends Character {
+    constructor(x, y, points) {
+        super(x, y, 0, 0); // Points pickups don't have health or damage
+        this.points = points;
+        this.element = document.createElement('div');
+        this.element.classList.add('points-pickup');
+        document.getElementById('game-container').appendChild(this.element);
+        this.updatePosition(); // Call updatePosition to set initial position
+    }
+
+    checkCollision(character) {
+        return (
+            this.x < character.x + character.element.offsetWidth &&
+            this.x + this.element.offsetWidth > character.x &&
+            this.y < character.y + character.element.offsetHeight &&
+            this.y + this.element.offsetHeight > character.y
+        );
+    }
+}
+
+// Array to store points pickups
+const pointsPickups = [];
+
+// Spawn points pickups periodically
+let pointsPickupInterval = setInterval(function(){
+    if (!gameActive) return; // Stop spawning points pickups if game is not active
+    // Randomly determine spawn position within the game container
+    const spawnX = Math.random() * (window.innerWidth - 50); // Adjust the values as needed
+    const spawnY = Math.random() * (window.innerHeight - 50);
+
+    // Randomly determine the number of points the pickup gives
+    const points = Math.floor(Math.random() * 10) + 1; // Adjust the range as needed
+
+    const pointsPickup = new PointsPickup(
+        spawnX,
+        spawnY,
+        points
+    );
+    pointsPickups.push(pointsPickup);
+}, 18000); // Adjust the interval as needed
+
+// Check collision between player and points pickups
+
+
+setInterval(function() {
+    if (!gameActive) return; // Stop checking collision if game is not active
+    pointsPickups.forEach((pointsPickup, index) => {
+        if (pointsPickup.checkCollision(player)) {
+            // Increase player's points
+            player.collectPoints.bind(player)(pointsPickup.points); // Bind collectPoints correctly
+            // Remove the points pickup from the array
+            pointsPickups.splice(index, 1);
+            // Remove the points pickup element from the DOM
+            pointsPickup.remove();
+        }
+    });
+}, 100); // Adjust the interval as needed
+
+
+
+
+
+
+// Function to update points display
+function updatePointsDisplay() {
+    document.getElementById('points-count').textContent = `R2D2's collected: ${player.points}`;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class Bullet extends Character {
+    constructor(x, y, direction) {
+        super(x, y, 0, 1);
+        this.element = document.createElement('div');
+        this.element.classList.add('bullet');
+        document.getElementById('game-container').appendChild(this.element);
+        this.direction = direction; // Store the direction
+        this.setRotation(); // Set rotation based on direction
+    }
+    setRotation() {
+        switch (this.direction) {
+            case 'up':
+                this.element.style.transform = 'rotate(0deg)';
+                break;
+            case 'upright':
+                this.element.style.transform = 'rotate(45deg)';
+                break;
+            case 'right':
+                this.element.style.transform = 'rotate(90deg)';
+                break;
+            case 'downright':
+                this.element.style.transform = 'rotate(135deg)';
+                break;
+            case 'down':
+                this.element.style.transform = 'rotate(180deg)';
+                break;
+            case 'downleft':
+                this.element.style.transform = 'rotate(225deg)';
+                break;
+            case 'left':
+                this.element.style.transform = 'rotate(270deg)';
+                break;
+            case 'upleft':
+                this.element.style.transform = 'rotate(315deg)';
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    move() {
+    const self = this;
+
+    function moveBullet() {
+    if (!gameActive) return; // Stop bullet movement if game is not active
+
+    // Move the bullet based on its direction
+    switch (self.direction) {
+        case 'up':
+            self.y -= 5;
+            break;
+        case 'down':
+            self.y += 5;
+            break;
+        case 'left':
+            self.x -= 5;
+            break;
+        case 'right':
+            self.x += 5;
+            break;
+        case 'upleft':
+            self.x -= 5;
+            self.y -= 5;
+            break;
+        case 'upright':
+            self.x += 5;
+            self.y -= 5;
+            break;
+        case 'downleft':
+            self.x -= 5;
+            self.y += 5;
+            break;
+        case 'downright':
+            self.x += 5;
+            self.y += 5;
+            break;
+    }
+
+    self.updatePosition();
+
+    // Check if the bullet is out of bounds
+    if (self.y < 1 || self.y > window.innerHeight - 20 || self.x < 1 || self.x > window.innerWidth - 20) {
+        self.remove(); // Remove the bullet if it's out of bounds
+    } else {
+        let hitEnemy = false; // Flag to check if the bullet has hit an enemy
+        // Check for collision with enemies
+        enemies.forEach((enemy, index) => {
+            if (!hitEnemy && self.checkCollision(enemy)) {
+                console.log('Bullet hit enemy');
+                enemy.hitByBullet(); // Deal damage to the enemy
+                if (enemy.hitPoints <= 0) {
+                    console.log('Enemy destroyed');
+                    enemy.remove(); // Remove the enemy if its hit points are <= 0
+                    enemies.splice(index, 1); // Remove the enemy from the array
+                }
+                self.remove();
+                requestAnimationFrame(moveBullet); // Remove the bullet regardless of enemy's hit points
+                hitEnemy = true; // Set hitEnemy to true to stop the bullet
+            }
+        });
+
+        if (!hitEnemy) {
+            console.log('Bullet did not hit enemy');
+            requestAnimationFrame(moveBullet); // Continue moving the bullet if it hasn't hit an enemy
+        }
+        
+    }
+    
+}
+
+
+
+    moveBullet();
+}
+
+
+
+
+    // Check collision with enemy
+    checkCollision(enemy) {
+      return (
+        this.x < enemy.x + enemy.element.offsetWidth &&
+        this.x + this.element.offsetWidth > enemy.x &&
+        this.y < enemy.y + enemy.element.offsetHeight &&
+        this.y + this.element.offsetHeight > enemy.y
+      );
+    }
+  }
+
+  const player = new Player(100, 100);
+  const enemies = [];
+
+  const movementKeys = {
+    'ArrowUp': false,
+    'ArrowDown': false,
+    'ArrowLeft': false,
+    'ArrowRight': false
+  };
+
+  let pressedKeys = {}; // Change to let to allow modification
+
+  document.addEventListener('keydown', function(event) {
+    pressedKeys[event.key] = true;
+    if (movementKeys.hasOwnProperty(event.key)) {
+        movementKeys[event.key] = true;
+    } else if (event.key === ' ') { // Space bar to shoot
+        player.shoot();
+    } else if (event.key === 'r') { // R key to reload
+        player.reload();
+    }
+    // Additional check for W, A, S, and D keys
+    else if (event.key === 'w' || event.key === 'a' || event.key === 's' || event.key === 'd') {
+        movementKeys[event.key] = true;
+    }
+});
+
+document.addEventListener('keyup', function(event) {
+    delete pressedKeys[event.key];
+    if (movementKeys.hasOwnProperty(event.key)) {
+        movementKeys[event.key] = false;
+    }
+    // Additional check for W, A, S, and D keys
+    else if (event.key === 'w' || event.key === 'a' || event.key === 's' || event.key === 'd') {
+        movementKeys[event.key] = false;
+    }
+});
+
+
+// JavaScript code
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    let isRightMouseDown = false; // Track if right mouse button is pressed down
+
+    document.addEventListener('mousedown', function (event) {
+        if (event.button === 2) { // Check if right mouse button is pressed
+            isRightMouseDown = true;
+            if (player) {
+                player.aimLine.style.display = 'block'; // Display the aim line
+            }
+        }
+    });
+
+    document.addEventListener('mouseup', function (event) {
+        if (event.button === 2) { // Check if right mouse button is released
+            isRightMouseDown = false;
+            if (player) {
+                player.aimLine.style.display = 'none'; // Hide the aim line
+            }
+        }
+    });
+
+    // Add a check in the main game loop to hide the aim line if right mouse button is not pressed
+    setInterval(function () {
+        if (!isRightMouseDown && player) {
+            player.aimLine.style.display = 'none'; // Hide the aim line
+        }
+    }, 50);
+
+    // Prevent default context menu on right click
+    document.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+setInterval(function() {
+    if (pressedKeys[' '] ) {
+        player.shoot();
+    }
+    if (movementKeys['ArrowUp'] || movementKeys['w']) {
+        player.moveUp();
+    }
+    if (movementKeys['ArrowDown'] || movementKeys['s']) {
+        player.moveDown();
+    }
+    if (movementKeys['ArrowLeft'] || movementKeys['a']) {
+        player.moveLeft();
+    }
+    if (movementKeys['ArrowRight'] || movementKeys['d']) {
+        player.moveRight();
+    }
+    if (movementKeys['ArrowUp'] && movementKeys['ArrowRight'] || (movementKeys['w'] && movementKeys['d'])) {
+        player.moveUpRight();
+    }
+    if (movementKeys['ArrowUp'] && movementKeys['ArrowLeft'] || (movementKeys['w'] && movementKeys['a'])) {
+        player.moveUpLeft();
+    }
+    if (movementKeys['ArrowDown'] && movementKeys['ArrowRight'] || (movementKeys['s'] && movementKeys['d'])) {
+        player.moveDownRight();
+    }
+    if (movementKeys['ArrowDown'] && movementKeys['ArrowLeft'] || (movementKeys['s'] && movementKeys['a'])) {
+        player.moveDownLeft();
+    }
+}, 50);
+
+
+  // Restart the game
+  // Restart the game
+  function resetGame() {
+    // Clear supply drop interval
+    clearInterval(supplyDropInterval);
+    // Clear points pickup interval
+    clearInterval(pointsPickupInterval);
+
+    // Reset supply drop and points pickup intervals to null
+    supplyDropInterval = null; // Remove the 'let' keyword
+    pointsPickupInterval = null; // Remove the 'let' keyword
+
+    // Reset player's properties and position
+    player.reload.bind(player)();
+    player.fullCap.bind(player)();
+    player.updateBulletCount();
+    player.points = 0;
+    updatePointsDisplay();
+    player.x = window.innerWidth / 2;
+    player.y = window.innerHeight / 2;
+    player.lastDirection = 'up';
+    player.updatePosition();
+    player.bulletCount = player.magazineCapacity;
+    player.updateBulletCount();
+
+    // Remove all existing bullets
+    const bullets = document.querySelectorAll('.bullet');
+    bullets.forEach(bullet => bullet.parentNode.removeChild(bullet));
+
+    // Remove all existing supply drops
+    supplyDrops.forEach(supplyDrop => supplyDrop.remove());
+    supplyDrops.length = 0;
+
+    // Remove all existing points pickups
+    pointsPickups.forEach(pointsPickup => pointsPickup.remove());
+    pointsPickups.length = 0;
+
+    // Show the aim line
+    const aimLine = document.getElementById('aim-line');
+
+    // Remove all existing enemies
+    enemies.forEach(enemy => enemy.remove());
+    enemies.length = 0;
+
+    // Reset the game over message
+    const gameOverElement = document.getElementById('game-over');
+    gameOverElement.innerHTML = '<h1>Game Over</h1><div onclick="resetGame()" class="youDead" style="color: lime;border: lime 5px solid;">Restart</div><div onclick="restartMenu()" class="youDead">Menu</div>';
+    gameOverElement.style.display = 'none';
+
+    gameActive = true; // Ensure the game is active after restart
+    pressedKeys = {}; // Reset the pressedKeys object
+    document.getElementById('points-count').textContent = `R2D2's collected: ${player.points}`; // Update points display
+
+    // Restart supply drop and points pickup intervals
+    supplyDropInterval = setInterval(function() {
+        if (!gameActive) return; // Stop spawning supply drops if game is not active
+        // Randomly determine spawn position within the game container
+        const spawnX = Math.random() * (window.innerWidth - 50); // Subtract character width
+        const spawnY = Math.random() * (window.innerHeight - 50); // Subtract character height
+
+        const supplyDrop = new SupplyDrop(spawnX, spawnY);
+        supplyDrops.push(supplyDrop);
+    }, 34000); // Adjust interval as needed
+
+    pointsPickupInterval = setInterval(function() {
+        if (!gameActive) return; // Stop spawning points pickups if game is not active
+        // Randomly determine spawn position within the game container
+        const spawnX = Math.random() * (window.innerWidth - 50); // Adjust the values as needed
+        const spawnY = Math.random() * (window.innerHeight - 50);
+
+        // Randomly determine the number of points the pickup gives
+        const points = Math.floor(Math.random() * 10) + 1; // Adjust the range as needed
+
+        const pointsPickup = new PointsPickup(spawnX, spawnY, points);
+        pointsPickups.push(pointsPickup);
+    }, 18000); // Adjust interval as needed
+}
+
+
+
+
+
+
+
+  // Game over function
+  // Game over function
+function gameOver() {
+    document.getElementById('game-over').style.display = 'block';
+    document.getElementById('game-over').innerHTML += `<p>Your Score: ${player.points} R2D2's collected</p>`; // Display the player's score
+    
+    gameActive = false; // Freeze the game
+}
+
+
+  // Spawn enemies periodically
+  // Spawn enemies periodically
+setInterval(function(){
+    if (!gameActive) return; // Stop spawning enemies if game is not active
+
+    // Randomly determine spawn position within the game container
+    let spawnX, spawnY;
+    do {
+        spawnX = Math.random() * (window.innerWidth - 100); // Adjust the value to avoid spawning too close to the edges
+        spawnY = Math.random() * (window.innerHeight - 100);
+    } while (Math.sqrt(Math.pow(spawnX - player.x, 2) + Math.pow(spawnY - player.y, 2)) < 300); // Ensure enemy does not spawn within 300px of the player
+
+    const enemy = new Enemy(spawnX, spawnY, 100, 10, player);
+    enemies.push(enemy);
+}, 2000);
+
+
+</script>
+
+</body>
+</html>
